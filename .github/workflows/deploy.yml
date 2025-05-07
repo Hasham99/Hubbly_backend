@@ -1,4 +1,4 @@
-name: Deploy to EC2 and Create .env
+name: Deploy Node App to EC2 and Upload .env
 
 on:
   push:
@@ -10,41 +10,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Connect to EC2 and deploy
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        run: |
+          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" > .env
+          echo "CLOUDINARY_API_SECRET_KEY=${{ secrets.CLOUDINARY_API_SECRET_KEY }}" >> .env
+          echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
+          echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+
+      - name: Copy .env to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: ".env"
+          target: "/home/ubuntu/Hubbly_backend/.env"
+
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          envs: CLOUDINARY_API_KEY,CLOUDINARY_API_SECRET_KEY,CLOUDINARY_NAME,CORS_ORIGIN,DATABASE_URL,PORT,SUPABASE_KEY,SUPABASE_URL
           script: |
-            echo "--- Current Directory ---"
-            pwd
+            cd /home/ubuntu/Hubbly_backend
 
-            cd /home/ubuntu
-
-            # Clone if not exists
-            if [ ! -d "Hubbly_backend" ]; then
-              git clone https://github.com/${{ github.repository }}.git Hubbly_backend
-            fi
-
-            cd Hubbly_backend
             git pull origin main
-
-            echo "--- Creating .env ---"
-            echo "TEST_ENV=success" > .env
-            echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env
-            echo "CLOUDINARY_API_SECRET_KEY=$CLOUDINARY_API_SECRET_KEY" >> .env
-            echo "CLOUDINARY_NAME=$CLOUDINARY_NAME" >> .env
-            echo "CORS_ORIGIN=$CORS_ORIGIN" >> .env
-            echo "DATABASE_URL=$DATABASE_URL" >> .env
-            echo "PORT=$PORT" >> .env
-            echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env
-            echo "SUPABASE_URL=$SUPABASE_URL" >> .env
-
-            echo "--- .env content ---"
-            cat .env
-
             npm install
 
             if pm2 list | grep -q "hubbly_backend"; then
