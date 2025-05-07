@@ -26,15 +26,25 @@ jobs:
             cd Hubbly_backend
             git pull origin main
 
-            # Create .env file with secrets
-            echo "CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}" > .env
-            echo "CLOUDINARY_API_SECRET_KEY=${CLOUDINARY_API_SECRET_KEY}" >> .env
-            echo "CLOUDINARY_NAME=${CLOUDINARY_NAME}" >> .env
-            echo "CORS_ORIGIN=${CORS_ORIGIN}" >> .env
-            echo "DATABASE_URL=${DATABASE_URL}" >> .env
-            echo "PORT=${PORT}" >> .env
-            echo "SUPABASE_KEY=${SUPABASE_KEY}" >> .env
-            echo "SUPABASE_URL=${SUPABASE_URL}" >> .env
+            # ✅ Export secrets so they are available in this shell
+            export CLOUDINARY_API_KEY="${CLOUDINARY_API_KEY}"
+            export CLOUDINARY_API_SECRET_KEY="${CLOUDINARY_API_SECRET_KEY}"
+            export CLOUDINARY_NAME="${CLOUDINARY_NAME}"
+            export CORS_ORIGIN="${CORS_ORIGIN}"
+            export DATABASE_URL="${DATABASE_URL}"
+            export PORT="${PORT}"
+            export SUPABASE_KEY="${SUPABASE_KEY}"
+            export SUPABASE_URL="${SUPABASE_URL}"
+
+            # ✅ Now create the .env file
+            echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" > .env
+            echo "CLOUDINARY_API_SECRET_KEY=$CLOUDINARY_API_SECRET_KEY" >> .env
+            echo "CLOUDINARY_NAME=$CLOUDINARY_NAME" >> .env
+            echo "CORS_ORIGIN=$CORS_ORIGIN" >> .env
+            echo "DATABASE_URL=$DATABASE_URL" >> .env
+            echo "PORT=$PORT" >> .env
+            echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env
+            echo "SUPABASE_URL=$SUPABASE_URL" >> .env
 
             npm install
 
