@@ -29,7 +29,7 @@ import userRouter from "./routes/user.routes.js"
 app.use("/api/v1/users", userRouter);
 
 app.use("/", (req, res) => {
-    res.send("okay")
+    res.send("Server is running")
 })
 
 // http://localhost:8090//api/v1/users/register
