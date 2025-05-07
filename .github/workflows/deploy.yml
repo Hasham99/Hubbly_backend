@@ -27,7 +27,7 @@ jobs:
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
           cat .env  # Verify that the .env file has been created
 
-      # Step 3: Transfer the .env file to EC2 using SCP
+      # Step 3: Copy .env to EC2 (Make sure the folder exists on EC2 first)
       - name: Copy .env to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -46,9 +46,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
+            # Check if the folder exists, if not clone it
+            if [ ! -d "/home/ubuntu/Hubbly_backend" ]; then
+              git clone https://github.com/${{ github.repository }} /home/ubuntu/Hubbly_backend
+            fi
+
+            # Change to the project directory
             cd /home/ubuntu/Hubbly_backend
 
-            # Pull latest code
+            # Pull the latest changes
             git pull origin main
 
             # Install dependencies
