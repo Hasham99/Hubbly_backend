@@ -16,7 +16,7 @@ router.route("/auth/register").post(upload.fields([
     { name: 'photo', maxCount: 1 },  // User photo
     { name: 'mother_photo', maxCount: 1 },  // Mother photo
     { name: 'father_photo', maxCount: 1 },  // Father photo
-    { name: 'sibling_photos', maxCount: 10 }  // Multiple sibling photos (adjust count as needed)
+    { name: 'sibling_photos', maxCount: 11 }  // Multiple sibling photos (adjust count as needed)
 ]),
 registerUser
 );
