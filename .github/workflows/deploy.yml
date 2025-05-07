@@ -17,48 +17,35 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ubuntu
+  cd /home/ubuntu
 
-            if [ ! -d "Hubbly_backend" ]; then
-              git clone https://github.com/${{ github.repository }}.git Hubbly_backend
-            fi
+  if [ ! -d "Hubbly_backend" ]; then
+    git clone https://github.com/${{ github.repository }}.git Hubbly_backend
+  fi
 
-            cd Hubbly_backend
-            git pull origin main
+  cd Hubbly_backend
+  git pull origin main
 
-            # ✅ Export secrets so they are available in this shell
-            export CLOUDINARY_API_KEY="${CLOUDINARY_API_KEY}"
-            export CLOUDINARY_API_SECRET_KEY="${CLOUDINARY_API_SECRET_KEY}"
-            export CLOUDINARY_NAME="${CLOUDINARY_NAME}"
-            export CORS_ORIGIN="${CORS_ORIGIN}"
-            export DATABASE_URL="${DATABASE_URL}"
-            export PORT="${PORT}"
-            export SUPABASE_KEY="${SUPABASE_KEY}"
-            export SUPABASE_URL="${SUPABASE_URL}"
+  pwd  # ✅ Print current working directory
 
-            # ✅ Now create the .env file
-            echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" > .env
-            echo "CLOUDINARY_API_SECRET_KEY=$CLOUDINARY_API_SECRET_KEY" >> .env
-            echo "CLOUDINARY_NAME=$CLOUDINARY_NAME" >> .env
-            echo "CORS_ORIGIN=$CORS_ORIGIN" >> .env
-            echo "DATABASE_URL=$DATABASE_URL" >> .env
-            echo "PORT=$PORT" >> .env
-            echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env
-            echo "SUPABASE_URL=$SUPABASE_URL" >> .env
+  echo "TEST_ENV=success" > .env  # ✅ Just a test line to confirm .env creation
 
-            npm install
+  echo "CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}" >> .env
+  echo "CLOUDINARY_API_SECRET_KEY=${CLOUDINARY_API_SECRET_KEY}" >> .env
+  echo "CLOUDINARY_NAME=${CLOUDINARY_NAME}" >> .env
+  echo "CORS_ORIGIN=${CORS_ORIGIN}" >> .env
+  echo "DATABASE_URL=${DATABASE_URL}" >> .env
+  echo "PORT=${PORT}" >> .env
+  echo "SUPABASE_KEY=${SUPABASE_KEY}" >> .env
+  echo "SUPABASE_URL=${SUPABASE_URL}" >> .env
 
-            if pm2 list | grep -q "hubbly_backend"; then
-              pm2 restart hubbly_backend
-            else
-              pm2 start src/index.js --name hubbly_backend
-            fi
-        env:
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET_KEY: ${{ secrets.CLOUDINARY_API_SECRET_KEY }}
-          CLOUDINARY_NAME: ${{ secrets.CLOUDINARY_NAME }}
-          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PORT: ${{ secrets.PORT }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  echo "--- .env content ---"
+  cat .env
+
+  npm install
+
+  if pm2 list | grep -q "hubbly_backend"; then
+    pm2 restart hubbly_backend
+  else
+    pm2 start src/index.js --name hubbly_backend
+  fi
