@@ -16,36 +16,39 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          envs: CLOUDINARY_API_KEY,CLOUDINARY_API_SECRET_KEY,CLOUDINARY_NAME,CORS_ORIGIN,DATABASE_URL,PORT,SUPABASE_KEY,SUPABASE_URL
           script: |
-  cd /home/ubuntu
+            echo "--- Current Directory ---"
+            pwd
 
-  if [ ! -d "Hubbly_backend" ]; then
-    git clone https://github.com/${{ github.repository }}.git Hubbly_backend
-  fi
+            cd /home/ubuntu
 
-  cd Hubbly_backend
-  git pull origin main
+            # Clone if not exists
+            if [ ! -d "Hubbly_backend" ]; then
+              git clone https://github.com/${{ github.repository }}.git Hubbly_backend
+            fi
 
-  pwd  # ✅ Print current working directory
+            cd Hubbly_backend
+            git pull origin main
 
-  echo "TEST_ENV=success" > .env  # ✅ Just a test line to confirm .env creation
+            echo "--- Creating .env ---"
+            echo "TEST_ENV=success" > .env
+            echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env
+            echo "CLOUDINARY_API_SECRET_KEY=$CLOUDINARY_API_SECRET_KEY" >> .env
+            echo "CLOUDINARY_NAME=$CLOUDINARY_NAME" >> .env
+            echo "CORS_ORIGIN=$CORS_ORIGIN" >> .env
+            echo "DATABASE_URL=$DATABASE_URL" >> .env
+            echo "PORT=$PORT" >> .env
+            echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env
+            echo "SUPABASE_URL=$SUPABASE_URL" >> .env
 
-  echo "CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}" >> .env
-  echo "CLOUDINARY_API_SECRET_KEY=${CLOUDINARY_API_SECRET_KEY}" >> .env
-  echo "CLOUDINARY_NAME=${CLOUDINARY_NAME}" >> .env
-  echo "CORS_ORIGIN=${CORS_ORIGIN}" >> .env
-  echo "DATABASE_URL=${DATABASE_URL}" >> .env
-  echo "PORT=${PORT}" >> .env
-  echo "SUPABASE_KEY=${SUPABASE_KEY}" >> .env
-  echo "SUPABASE_URL=${SUPABASE_URL}" >> .env
+            echo "--- .env content ---"
+            cat .env
 
-  echo "--- .env content ---"
-  cat .env
+            npm install
 
-  npm install
-
-  if pm2 list | grep -q "hubbly_backend"; then
-    pm2 restart hubbly_backend
-  else
-    pm2 start src/index.js --name hubbly_backend
-  fi
+            if pm2 list | grep -q "hubbly_backend"; then
+              pm2 restart hubbly_backend
+            else
+              pm2 start src/index.js --name hubbly_backend
+            fi
