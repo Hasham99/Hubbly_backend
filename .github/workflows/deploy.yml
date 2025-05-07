@@ -1,17 +1,40 @@
-- name: Create .env on EC2
-  run: |
-    ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-      cd /home/${{ secrets.EC2_USER }}/node-app
-      echo "PORT=${{ secrets.PORT }}" > .env
-      echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-      echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
-      echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-      echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
-      echo "CLOUDINARY_API_SECRET_KEY=${{ secrets.CLOUDINARY_API_SECRET_KEY }}" >> .env
-      echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
-      echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
-      echo "NODE_ENV=production" >> .env
+name: Deploy to EC2 and Create .env
 
-      npm install
-      # pm2 restart all || pm2 start src/index.js --name my-app
-    EOF
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Connect and deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ubuntu
+            if [ ! -d "my-app" ]; then
+              git clone https://github.com/your-username/your-repo.git my-app
+            fi
+            cd my-app
+            git pull
+
+            # Create .env file
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" > .env
+            echo "CLOUDINARY_API_SECRET_KEY=${{ secrets.CLOUDINARY_API_SECRET_KEY }}" >> .env
+            echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
+            echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+            echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+            echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+
+            npm install
+            pm2 restart all || pm2 start app.js --name my-app
