@@ -1,68 +1,52 @@
-name: Deploy Node App to EC2 and Upload .env
+name: Deploy
 
 on:
   push:
     branches:
-      - main  # Trigger deploy on push to main branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code from the repository
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # Step 2: Create the .env file locally on the GitHub runner
-      - name: Create .env file
-        run: |
-          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" > .env
-          echo "CLOUDINARY_API_SECRET_KEY=${{ secrets.CLOUDINARY_API_SECRET_KEY }}" >> .env
-          echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
-          echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "PORT=${{ secrets.PORT }}" >> .env
-          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-          cat .env  # Verify that the .env file has been created
+    - name: Create .env file from secrets
+      run: |
+        echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+        echo "CLOUDINARY_API_SECRET_KEY=${{ secrets.CLOUDINARY_API_SECRET_KEY }}" >> .env
+        echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
+        echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "PORT=${{ secrets.PORT }}" >> .env
+        echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
 
-      # Step 3: Copy .env to EC2 (Make sure the folder exists on EC2 first)
-      - name: Copy .env to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          source: ".env"
-          target: "/home/ubuntu/Hubbly_backend/.env"
-          debug: true  # Enable debug logging for more detailed error info
+    - name: Upload .env to server
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        source: ".env"
+        target: "~/"
 
-      # Step 4: SSH into EC2 and deploy the app
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            # Check if the folder exists, if not clone it
-            if [ ! -d "/home/ubuntu/Hubbly_backend" ]; then
-              git clone https://github.com/${{ github.repository }} /home/ubuntu/Hubbly_backend
-            fi
-
-            # Change to the project directory
-            cd /home/ubuntu/Hubbly_backend
-
-            # Pull the latest changes
-            git pull origin main
-
-            # Install dependencies
-            npm install
-
-            # Restart or start the app with pm2
-            if pm2 list | grep -q "hubbly_backend"; then
-              pm2 restart hubbly_backend
-            else
-              pm2 start src/index.js --name hubbly_backend
-            fi
+    - name: SSH into server and deploy
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd ~/Hubbly_backend || git clone https://github.com/Hasham99/Hubbly_backend && cd Hubbly_backend
+          pm2 stop hubbly_backend || true
+          cd ..
+          rm -rf Hubbly_backend
+          git clone https://github.com/Hasham99/Hubbly_backend
+          cd Hubbly_backend
+          mv ~/".env" .
+          npm install
+          pm2 start src/index.js --name hubbly_backend
+          pm2 save
