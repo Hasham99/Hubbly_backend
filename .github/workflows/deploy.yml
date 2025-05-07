@@ -3,7 +3,7 @@ name: Deploy to EC2 and Create .env
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main  # Change if you're deploying from a different branch
 
 jobs:
   deploy:
@@ -30,8 +30,8 @@ jobs:
             # Pull the latest code
             git pull origin main
 
-            # Create or overwrite .env
-            cat > .env <<EOF
+            # ✅ Create or overwrite .env correctly using HEREDOC
+            cat <<EOF > .env
 CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
 CLOUDINARY_API_SECRET_KEY=${{ secrets.CLOUDINARY_API_SECRET_KEY }}
 CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}
@@ -47,7 +47,7 @@ EOF
 
             # Start or restart the app with pm2
             if pm2 list | grep -q "hubbly_backend"; then
-              pm2 restart my-app
+              pm2 restart hubbly_backend
             else
               pm2 start src/index.js --name hubbly_backend
             fi
