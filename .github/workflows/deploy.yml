@@ -21,6 +21,7 @@ jobs:
         echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
         echo "PORT=${{ secrets.PORT }}" >> .env
+        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
         echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
         echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
         echo "TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}" >> .env
