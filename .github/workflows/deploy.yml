@@ -22,7 +22,10 @@ jobs:
         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
         echo "PORT=${{ secrets.PORT }}" >> .env
         echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
-        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+        echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
+        echo "TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}" >> .env
+        echo "TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}" >> .env
+        echo "TWILIO_SMS_NUMBER=${{ secrets.TWILIO_SMS_NUMBER }}" >> .env
 
     - name: Upload .env to server
       uses: appleboy/scp-action@v0.1.4

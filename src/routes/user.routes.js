@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { getUser, loginUser, registerUser } from "../controllers/user.controller.js";
+import { getUser, loginUser, registerUser, verifyOtpAndLogin } from "../controllers/user.controller.js";
 
 const router = Router();
 
@@ -20,7 +20,9 @@ router.route("/auth/register").post(upload.fields([
 ]),
 registerUser
 );
-
+// router.all('*', (req, res) => {
+//     res.status(404).send('Route not found');
+//   });
 // POST endpoint for registering the user, including photo uploads
 // router.post('/users/register',
 //     upload.fields([
@@ -32,6 +34,7 @@ registerUser
 //     registerUser
 // );
 router.route("/auth/login").post(loginUser);
+router.route("/auth/verify-otp").post(verifyOtpAndLogin);
 
 router.route("/get").get(getUser);
 
