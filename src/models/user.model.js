@@ -70,7 +70,8 @@ const matchPreferencesSchema = {
 
 const userSchema = new Schema({
     
-  supabaseId: { type: String, required: true, unique: true }, // Link to Supabase user
+  // supabaseId: { type: String, required: true, unique: true }, // Link to Supabase user
+  phoneNumber: { type: String, required: true, unique: true }, // Phone number for verification
 
   // SCREEN 1
   relationship: String, // Who is the profile for? (Son/Daughter/etc.)

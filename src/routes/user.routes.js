@@ -2,14 +2,16 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { getUser, loginUser, registerUser, verifyOtpAndLogin } from "../controllers/user.controller.js";
+import { getUser, getUserById , loginUser, registerUser, verifyOtp } from "../controllers/user.controller.js";
+
+// const { auth } = require('express-openid-connect');
 
 const router = Router();
 
 
-router.route("/").get((req, res) => {
-    res.send("api is working 'Wrong Path'")
-})
+// router.route("/auth0").get((req, res) => {
+//     res.send("api is working 'Wrong Path'")
+// })
 
 // router.route("/auth/register").post(registerUser);
 router.route("/auth/register").post(upload.fields([
@@ -34,9 +36,10 @@ registerUser
 //     registerUser
 // );
 router.route("/auth/login").post(loginUser);
-router.route("/auth/verify-otp").post(verifyOtpAndLogin);
+router.route("/auth/verify-otp").post(verifyOtp);
 
 router.route("/get").get(getUser);
+router.route("/get/:userId").get(getUserById);
 
 // router.route("/register").post(
 //     upload.fields([
