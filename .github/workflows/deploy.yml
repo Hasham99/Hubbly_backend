@@ -20,6 +20,11 @@ jobs:
         echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
         echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
+        echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> .env
+        echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env
+        echo "ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }}" >> .env
+        echo "REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}" >> .env
         echo "PORT=${{ secrets.PORT }}" >> .env
         echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
         echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
