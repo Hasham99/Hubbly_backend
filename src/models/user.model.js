@@ -48,10 +48,10 @@ const siblingSchema = {
   photo: String
 };
 
-const familyEnvironmentSchema = {
+const familyEnvironmentSchema = ({
   type: String,
   notes: String
-};
+}, { _id: false });
 
 const matchPreferencesSchema = {
   age_range: {

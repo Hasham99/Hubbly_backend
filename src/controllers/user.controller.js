@@ -40,6 +40,104 @@ const registerUser = asyncHandler(async (req, res) => {
     second_nationality,
     have_PR,
     PR_country,
+    languages = [],
+    education = {},
+    career = {},
+    living = {},
+    photo = {},
+    parent_status = {},
+    no_of_sisters,
+    no_of_brothers,
+    total_siblings,
+    siblings = [],
+    family_environment = {},
+    match_preferences = {}
+  } = req.body;
+
+  // Validate required field
+  if (!phoneNumber) {
+    throw new apiError(400, "Missing required field: phoneNumber is required.");
+  }
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ phoneNumber });
+  if (existingUser) {
+    throw new apiError(409, "User already registered.");
+  }
+
+  // Create new user
+  const user = await User.create({
+    phoneNumber,
+    relationship,
+    you_are,
+    name,
+    date_of_birth,
+    gender,
+    height,
+    marital_status,
+    religion,
+    have_children,
+    number_of_children,
+    ethnicity,
+    city,
+    area,
+    country,
+    open_to_move_to_different_city,
+    open_to_move_to_different_country,
+    nationality,
+    have_dual_nationality,
+    second_nationality,
+    have_PR,
+    PR_country,
+    languages,
+    education,
+    career,
+    living,
+    photo,
+    parent_status,
+    no_of_sisters,
+    no_of_brothers,
+    total_siblings,
+    siblings,
+    family_environment,
+    match_preferences
+  });
+
+  // Generate JWT token
+  const token = generateToken(user._id);
+
+  return res.status(201).json(
+    new apiResponse(201, {
+      user,
+      token
+    }, "User registered successfully.")
+  );
+});
+
+const registerUser01 = asyncHandler(async (req, res) => {
+  const {
+    phoneNumber,
+    relationship,
+    you_are,
+    name,
+    date_of_birth,
+    gender,
+    height,
+    marital_status,
+    religion,
+    have_children,
+    number_of_children,
+    ethnicity,
+    city,
+    area,
+    country,
+    open_to_move_to_different_city,
+    open_to_move_to_different_country,
+    nationality,
+    have_dual_nationality,
+    second_nationality,
+    have_PR,
+    PR_country,
     languages,
     education,
     career,
