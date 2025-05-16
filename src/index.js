@@ -1,10 +1,24 @@
 import { app } from "./app.js";
 import dotenv from "dotenv";
 import connectDb from "./db/index.js"
+import { createServer } from "http";
+import { Server } from "socket.io";
 dotenv.config({
     path: './.env'
 })
+// const server = createServer(app); // Create raw HTTP server
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.CORS_ORIGIN,
+//     credentials: true
+//   }
+// });
 
+// // Handle incoming socket connections
+// io.on("connection", (socket) => {
+//   console.log(`🔌 New socket connected: ${socket.id}`);
+//   handleSocketConnection(socket, io); // custom logic for matchmaking
+// });
 
 connectDb().then(() => {
     app.listen(process.env.PORT, () => {
