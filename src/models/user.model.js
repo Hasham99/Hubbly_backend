@@ -4,47 +4,47 @@ import mongoose, { Schema } from "mongoose";
 const educationSchema = {
   highest_degree: String,
   institution: String,
-  field_of_study: String
+  fieldOfStudy: String
 };
 
 const careerSchema = {
   occupation: String,
   company: String,
-  monthly_income_range: String
+  monthlyIncomeRange: String
 };
 
 const livingSchema = {
-  home_ownership: { type: String, enum: ['own', 'rent'] },
-  living_with_family: Boolean
+  homeOwnership: { type: String, enum: ['own', 'rent'] },
+  livingWithFamily: Boolean
 };
 
 const photoSchema = {
   url: String,
-  is_private: Boolean
+  isPrivate: Boolean
 };
 
 const parentSchema = {
-  marital_status: String,
+  maritalStatus: String,
   educationLevel: String,
   institution: String,
   profession: String,
   city: String,
   area: String,
   country: String,
-  home_ownership: String,
+  homeOwnership: String,
   photo: String
 };
 
 const siblingSchema = {
   age: String,
-  marital_status: String,
-  education_level: String,
+  maritalStatus: String,
+  educationLevel: String,
   institution: String,
   profession: String,
   city: String,
   area: String,
   country: String,
-  home_ownership: String,
+  homeOwnership: String,
   photo: String
 };
 
@@ -54,11 +54,11 @@ const familyEnvironmentSchema = ({
 }, { _id: false });
 
 const matchPreferencesSchema = {
-  age_range: {
+  ageRange: {
     min: Number,
     max: Number
   },
-  height_range: {
+  heightRange: {
     min: String,
     max: String
   },
@@ -75,36 +75,36 @@ const userSchema = new Schema({
 
   // SCREEN 1
   relationship: String, // Who is the profile for? (Son/Daughter/etc.)
-  you_are: String, // Who is registering (Father/Mother/etc.)
+  youAre: String, // Who is registering (Father/Mother/etc.)
 
   // SCREEN 2
   name: String,
 
   // SCREEN 3
-  date_of_birth: Date,
+  dateOfBirth: Date,
   gender: String,
   height: String,
 
   // SCREEN 4
-  marital_status: String,
+  maritalStatus: String,
   religion: String,
-  have_children: Boolean,
-  number_of_children: Number,
+  haveChildren: Boolean,
+  numberOfChildren: Number,
 
   // SCREEN 5
   ethnicity: String,
   city: String,
   area: String,
   country: String,
-  open_to_move_to_different_city: Boolean,
-  open_to_move_to_different_country: Boolean,
+  openToMoveToDifferentCity: Boolean,
+  openToMoveToDifferentCountry: Boolean,
 
   // SCREEN 6
   nationality: String,
-  have_dual_nationality: Boolean,
-  second_nationality: String,
-  have_PR: Boolean,
-  PR_country: String,
+  haveDualNationality: Boolean,
+  secondNationality: String,
+  havePr: Boolean,
+  prCountry: String,
   languages: [String],
 
   // SCREEN 7
@@ -116,26 +116,26 @@ const userSchema = new Schema({
   photo: photoSchema,
 
   // SCREEN 9
-  parent_status: {
-    mother_alive: Boolean,
-    father_alive: Boolean,
+  parentStatus: {
+    motherAlive: Boolean,
+    fatherAlive: Boolean,
     mother: parentSchema,
     father: parentSchema
   },
 
   // SCREEN 11
-  no_of_sisters: Number,
-  no_of_brothers: Number,
-  total_siblings: Number,
+  noOfSisters: Number,
+  noOfBrothers: Number,
+  totalSiblings: Number,
 
   // SCREEN 12
   siblings: [siblingSchema],
 
   // SCREEN 13
-  family_environment: familyEnvironmentSchema,
+  familyEnvironment: familyEnvironmentSchema,
 
   // SCREEN 14
-  match_preferences: matchPreferencesSchema
+  matchPreferences: matchPreferencesSchema
 }, { timestamps: true });
 
 export const User = mongoose.model("User", userSchema)

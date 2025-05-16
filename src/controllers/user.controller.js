@@ -20,38 +20,38 @@ const registerUser = asyncHandler(async (req, res) => {
   const {
     phoneNumber,
     relationship,
-    you_are,
+    youAre,
     name,
-    date_of_birth,
+    dateOfBirth,
     gender,
     height,
-    marital_status,
+    maritalStatus,
     religion,
-    have_children,
-    number_of_children,
+    haveChildren,
+    numberOfChildren,
     ethnicity,
     city,
     area,
     country,
-    open_to_move_to_different_city,
-    open_to_move_to_different_country,
+    openToMoveToDifferentCity,
+    openToMoveToDifferentCountry,
     nationality,
-    have_dual_nationality,
-    second_nationality,
-    have_PR,
-    PR_country,
+    haveDualNationality,
+    secondNationality,
+    havePr,
+    prCountry,
     languages = [],
     education = {},
     career = {},
     living = {},
     photo = {},
-    parent_status = {},
-    no_of_sisters,
-    no_of_brothers,
-    total_siblings,
+    parentStatus = {},
+    noOfSisters,
+    noOfBrothers,
+    totalSiblings,
     siblings = [],
-    family_environment = {},
-    match_preferences = {}
+    familyEnvironment = {},
+    matchPreferences = {}
   } = req.body;
 
   // Validate required field
@@ -69,38 +69,38 @@ const registerUser = asyncHandler(async (req, res) => {
   const user = await User.create({
     phoneNumber,
     relationship,
-    you_are,
+    youAre,
     name,
-    date_of_birth,
+    dateOfBirth,
     gender,
     height,
-    marital_status,
+    maritalStatus,
     religion,
-    have_children,
-    number_of_children,
+    haveChildren,
+    numberOfChildren,
     ethnicity,
     city,
     area,
     country,
-    open_to_move_to_different_city,
-    open_to_move_to_different_country,
+    openToMoveToDifferentCity,
+    openToMoveToDifferentCountry,
     nationality,
-    have_dual_nationality,
-    second_nationality,
-    have_PR,
-    PR_country,
+    haveDualNationality,
+    secondNationality,
+    havePr,
+    prCountry,
     languages,
     education,
     career,
     living,
     photo,
-    parent_status,
-    no_of_sisters,
-    no_of_brothers,
-    total_siblings,
+    parentStatus,
+    noOfSisters,
+    noOfBrothers,
+    totalSiblings,
     siblings,
-    family_environment,
-    match_preferences
+    familyEnvironment,
+    matchPreferences
   });
 
   // Generate JWT token
@@ -112,101 +112,6 @@ const registerUser = asyncHandler(async (req, res) => {
       token
     }, "User registered successfully.")
   );
-});
-
-const registerUser01 = asyncHandler(async (req, res) => {
-  const {
-    phoneNumber,
-    relationship,
-    you_are,
-    name,
-    date_of_birth,
-    gender,
-    height,
-    marital_status,
-    religion,
-    have_children,
-    number_of_children,
-    ethnicity,
-    city,
-    area,
-    country,
-    open_to_move_to_different_city,
-    open_to_move_to_different_country,
-    nationality,
-    have_dual_nationality,
-    second_nationality,
-    have_PR,
-    PR_country,
-    languages,
-    education,
-    career,
-    living,
-    photo,
-    parent_status,
-    no_of_sisters,
-    no_of_brothers,
-    total_siblings,
-    siblings,
-    family_environment,
-    match_preferences
-  } = req.body;
-
-  if (!phoneNumber) {
-    throw new apiError(400, "Missing required fields: phoneNumber is required.");
-  }
-
-  // Check if user already exists
-  const existingUser = await User.findOne({ phoneNumber });
-  if (existingUser) {
-    throw new apiError(409, "User already registered.");
-  }
-
-  // Create new user
-  const user = await User.create({
-    phoneNumber,
-    // supabaseId,
-    relationship,
-    you_are,
-    name,
-    date_of_birth,
-    gender,
-    height,
-    marital_status,
-    religion,
-    have_children,
-    number_of_children,
-    ethnicity,
-    city,
-    area,
-    country,
-    open_to_move_to_different_city,
-    open_to_move_to_different_country,
-    nationality,
-    have_dual_nationality,
-    second_nationality,
-    have_PR,
-    PR_country,
-    languages,
-    education,
-    career,
-    living,
-    photo,
-    parent_status,
-    no_of_sisters,
-    no_of_brothers,
-    total_siblings,
-    siblings,
-    family_environment,
-    match_preferences
-  });
-
-  const token = generateToken(user._id); // Generate JWT token for the user
-  
-  return res.status(201).json(new apiResponse(201, {
-    user: user,
-    token: token, // Include the token in the response
-  }, "User registered successfully."));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -264,7 +169,6 @@ const verifyOtp = asyncHandler(async (req, res) => {
   return res.status(200).json(new apiResponse(200, { token, user }, "Login successful"));
 });
 
-
 const getUser = asyncHandler(async (req, res) => {
   const users = await User.find();
 
@@ -320,80 +224,6 @@ export const handleSocketConnection = (socket, io) => {
 };
 
 // Matchmaking controller
-export const findMatches01 = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
-
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new apiError(404, "User not found");
-  }
-
-  // Extract match preferences
-  const preferences = user.match_preferences;
-
-  const query = {
-    _id: { $ne: user._id }, // Exclude self
-    gender: { $ne: user.gender }, // Opposite gender (optional logic)
-    "date_of_birth": {
-      $gte: new Date(new Date().setFullYear(new Date().getFullYear() - preferences.age_range.max)),
-      $lte: new Date(new Date().setFullYear(new Date().getFullYear() - preferences.age_range.min)),
-    },
-    "education.highest_degree": preferences.education,
-    religion: preferences.religion,
-    ethnicity: preferences.ethnicity,
-    city: preferences.location // Simplified location filter
-  };
-
-  const matches = await User.find(query).limit(10);
-
-  return res.status(200).json(new apiResponse(200, matches, "Matches found"));
-});
-
-export const findMatches02 = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
-  const user = await User.findById(userId);
-
-  if (!user) {
-    throw new apiError(404, "User not found");
-  }
-
-  const preferences = user.match_preferences || {};
-  const query = { _id: { $ne: user._id } };
-
-  // Opposite gender (optional)
-  if (user.gender) {
-    query.gender = { $ne: user.gender };
-  }
-
-  // Age range filter
-  if (preferences.age_range?.min && preferences.age_range?.max) {
-    const maxDOB = new Date(new Date().setFullYear(new Date().getFullYear() - preferences.age_range.min));
-    const minDOB = new Date(new Date().setFullYear(new Date().getFullYear() - preferences.age_range.max));
-    query.date_of_birth = { $gte: minDOB, $lte: maxDOB };
-  }
-
-  // Optional filters
-  if (preferences.education) {
-    query["education.highest_degree"] = preferences.education;
-  }
-
-  if (preferences.religion) {
-    query.religion = preferences.religion;
-  }
-
-  if (preferences.ethnicity) {
-    query.ethnicity = preferences.ethnicity;
-  }
-
-  if (preferences.location) {
-    query.city = preferences.location;
-  }
-
-  const matches = await User.find(query).limit(10);
-
-  return res.status(200).json(new apiResponse(200, matches, "Matches found"));
-});
-
 export const findMatches = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   
@@ -401,12 +231,12 @@ export const findMatches = asyncHandler(async (req, res) => {
   
   if (!currentUser) throw new apiError(404, "User not found");
 
-  const { match_preferences } = currentUser;
+  const { matchPreferences } = currentUser;
 
-  if (!match_preferences) throw new apiError(400, "Match preferences not set");
+  if (!matchPreferences) throw new apiError(400, "Match preferences not set");
 
   const currentAge = Math.floor(
-    (Date.now() - new Date(currentUser.date_of_birth)) / (1000 * 60 * 60 * 24 * 365.25)
+    (Date.now() - new Date(currentUser.dateOfBirth)) / (1000 * 60 * 60 * 24 * 365.25)
   );
 
   const candidates = await User.find({ _id: { $ne: currentUser._id } });
@@ -417,37 +247,37 @@ export const findMatches = asyncHandler(async (req, res) => {
     const matchReasons = [];
 
     const candidateAge = Math.floor(
-      (Date.now() - new Date(candidate.date_of_birth)) / (1000 * 60 * 60 * 24 * 365.25)
+      (Date.now() - new Date(candidate.dateOfBirth)) / (1000 * 60 * 60 * 24 * 365.25)
     );
 
     // Age match
     if (
-      candidateAge >= match_preferences.age_range.min &&
-      candidateAge <= match_preferences.age_range.max
+      candidateAge >= matchPreferences.ageRange.min &&
+      candidateAge <= matchPreferences.ageRange.max
     ) {
       matchReasons.push("age");
     }
 
     // Religion
-    if (candidate.religion === match_preferences.religion) {
+    if (candidate.religion === matchPreferences.religion) {
       matchReasons.push("religion");
     }
 
     // Ethnicity
-    if (candidate.ethnicity === match_preferences.ethnicity) {
+    if (candidate.ethnicity === matchPreferences.ethnicity) {
       matchReasons.push("ethnicity");
     }
 
     // Education (loose match)
     if (
-      candidate.education?.highest_degree?.toLowerCase() ===
-      match_preferences.education?.toLowerCase()
+      candidate.education?.highestDegree?.toLowerCase() ===
+      matchPreferences.education?.toLowerCase()
     ) {
       matchReasons.push("education");
     }
 
     // Location (if match_preferences.location includes candidate.city or candidate.country)
-    const prefLocations = match_preferences.location?.split(",").map(loc => loc.trim().toLowerCase());
+    const prefLocations = matchPreferences.location?.split(",").map(loc => loc.trim().toLowerCase());
     if (
       prefLocations?.includes(candidate.city?.toLowerCase()) ||
       prefLocations?.includes(candidate.country?.toLowerCase())
