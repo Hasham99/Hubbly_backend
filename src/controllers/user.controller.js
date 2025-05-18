@@ -149,6 +149,145 @@ const registerUser = asyncHandler(async (req, res) => {
   );
 });
 
+const registerUserFileUpload = asyncHandler(async (req, res) => {
+  const {
+    phoneNumber,
+    relationship,
+    youAre,
+    name,
+    dateOfBirth,
+    gender,
+    height,
+    maritalStatus,
+    religion,
+    haveChildren,
+    numberOfChildren,
+    ethnicity,
+    city,
+    area,
+    country,
+    openToMoveToDifferentCity,
+    openToMoveToDifferentCountry,
+    nationality,
+    haveDualNationality,
+    secondNationality,
+    havePr,
+    prCountry,
+    languages = [],
+    education = {},
+    career = {},
+    living = {},
+    parentStatus = {},
+    noOfSisters,
+    noOfBrothers,
+    totalSiblings,
+    siblings = [],
+    familyEnvironment = {},
+    matchPreferences = {}
+  } = req.body;
+
+  // Required field validation
+  if (!phoneNumber) {
+    throw new apiError(400, "Missing required field: phoneNumber.");
+  }
+
+  // Check for existing user
+  const existingUser = await User.findOne({ phoneNumber });
+  if (existingUser) {
+    throw new apiError(409, "User already registered.");
+  }
+
+  // Files from multer
+  const files = req.files || {};
+  const photoFile = files.photo?.[0];
+  const motherPhotoFile = files.mother_photo?.[0];
+  const fatherPhotoFile = files.father_photo?.[0];
+  const siblingPhotoFiles = files.sibling_photos || [];
+
+  // Upload to Cloudinary
+  const uploadedPhoto = photoFile ? await uploadOnCloudinary(photoFile.path) : null;
+  const uploadedMotherPhoto = motherPhotoFile ? await uploadOnCloudinary(motherPhotoFile.path) : null;
+  const uploadedFatherPhoto = fatherPhotoFile ? await uploadOnCloudinary(fatherPhotoFile.path) : null;
+
+  const siblingPhotos = [];
+  for (const file of siblingPhotoFiles) {
+    const uploaded = await uploadOnCloudinary(file.path);
+    if (uploaded) siblingPhotos.push(uploaded.url);
+  }
+
+  // Combine sibling data with photo
+  let siblingsData = [];
+  try {
+    const parsedSiblings = typeof siblings === 'string' ? JSON.parse(siblings) : siblings;
+
+    siblingsData = parsedSiblings.map((sibling, idx) => ({
+      ...sibling,
+      photo: siblingPhotos[idx] || null
+    }));
+  } catch (err) {
+    throw new apiError(400, "Invalid siblings data format.");
+  }
+
+  // Build user object
+  const user = await User.create({
+    phoneNumber,
+    relationship,
+    youAre,
+    name,
+    dateOfBirth,
+    gender,
+    height,
+    maritalStatus,
+    religion,
+    haveChildren,
+    numberOfChildren,
+    ethnicity,
+    city,
+    area,
+    country,
+    openToMoveToDifferentCity,
+    openToMoveToDifferentCountry,
+    nationality,
+    haveDualNationality,
+    secondNationality,
+    havePr,
+    prCountry,
+    languages,
+    education,
+    career,
+    living,
+    photo: uploadedPhoto ? {
+      url: uploadedPhoto.url,
+      isPrivate: false
+    } : undefined,
+    parentStatus: {
+      motherAlive: parentStatus?.motherAlive === 'true',
+      fatherAlive: parentStatus?.fatherAlive === 'true',
+      mother: {
+        ...parentStatus?.mother,
+        photo: uploadedMotherPhoto?.url || null
+      },
+      father: {
+        ...parentStatus?.father,
+        photo: uploadedFatherPhoto?.url || null
+      }
+    },
+    noOfSisters,
+    noOfBrothers,
+    totalSiblings,
+    siblings: siblingsData,
+    familyEnvironment,
+    matchPreferences
+  });
+
+  const token = generateToken(user._id);
+
+  return res.status(201).json(
+    new apiResponse(201, { user, token }, "User registered successfully.")
+  );
+});
+
+
 const loginUser = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
@@ -333,4 +472,4 @@ export const findMatches = asyncHandler(async (req, res) => {
   );
 });
 
-export {loginRegisterUser, registerUser, getUser, loginUser, verifyOtp, getUserById};
+export {loginRegisterUser, registerUser, getUser, loginUser, verifyOtp, getUserById, registerUserFileUpload};

@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { findMatches, getUser, getUserById , loginRegisterUser, loginUser, registerUser, verifyOtp } from "../controllers/user.controller.js";
+import { findMatches, getUser, getUserById , loginRegisterUser, loginUser, registerUser, registerUserFileUpload, verifyOtp } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
@@ -22,6 +22,16 @@ router.route("/auth/register").post(upload.fields([
 ]),
 registerUser
 );
+
+router.route("/auth/register-cloudinary").post(upload.fields([
+    { name: 'photo', maxCount: 1 },  // User photo
+    { name: 'mother_photo', maxCount: 1 },  // Mother photo
+    { name: 'father_photo', maxCount: 1 },  // Father photo
+    { name: 'sibling_photos', maxCount: 10 }  // Multiple sibling photos (adjust count as needed)
+]),
+registerUserFileUpload
+);
+
 // router.all('*', (req, res) => {
 //     res.status(404).send('Route not found');
 //   });
