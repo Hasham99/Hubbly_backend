@@ -16,6 +16,41 @@ const generateToken = (userId) => {
   });
 };
 
+
+// login and register user in one controller
+ const loginRegisterUser = asyncHandler(async (req, res) => {
+
+  const { phoneNumber } = req.body;
+  if (!phoneNumber) {
+    throw new apiError(400, "Phone number is required");
+  }
+  // Check if user already exists
+  const existingUser = await User.findOne({ phoneNumber });
+  if (existingUser) {
+
+    
+  const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+  // Store OTP in session
+  req.session.otp = otp;
+  req.session.phoneNumber = phoneNumber;
+  // await sendOtpToSms(phoneNumber, otp);
+  return res.status(200).json(new apiResponse(200, {
+    phoneNumber,
+    otp,
+  }, "OTP sent to your phone number for login"));
+  }
+  // user registration bt sending an otp first then verifying the otp
+  const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+  // Store OTP in session
+  req.session.otp = otp;
+  req.session.phoneNumber = phoneNumber;
+  // await sendOtpToSms(phoneNumber, otp);
+  return res.status(200).json(new apiResponse(200, {
+    phoneNumber,
+    otp,
+  }, "OTP sent to your phone number for registration"));
+ });
+
 const registerUser = asyncHandler(async (req, res) => {
   const {
     phoneNumber,
@@ -298,4 +333,4 @@ export const findMatches = asyncHandler(async (req, res) => {
   );
 });
 
-export { registerUser, getUser, loginUser, verifyOtp, getUserById};
+export {loginRegisterUser, registerUser, getUser, loginUser, verifyOtp, getUserById};

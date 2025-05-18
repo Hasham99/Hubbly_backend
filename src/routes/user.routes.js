@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { findMatches, getUser, getUserById , loginUser, registerUser, verifyOtp } from "../controllers/user.controller.js";
+import { findMatches, getUser, getUserById , loginRegisterUser, loginUser, registerUser, verifyOtp } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
@@ -36,6 +36,7 @@ registerUser
 //     registerUser
 // );
 router.route("/auth/login").post(loginUser);
+router.route("/auth/new-login").post(loginRegisterUser);
 router.route("/auth/verify-otp").post(verifyOtp);
 
 router.route("/find").get(verifyJWT, findMatches);
