@@ -8,6 +8,8 @@ import { apiResponse } from "../utils/apiResponse.js";
 import { sendOtpToSms } from "../utils/twilioUtils.js"; // Import Twilio utility for sending OTPs
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { FileUpload } from "../models/fileUpload.model.js"; // ✅ Add this line
+
 
 // Function to generate JWT token
 const generateToken = (userId) => {
@@ -149,6 +151,41 @@ const registerUser = asyncHandler(async (req, res) => {
   );
 });
 
+// POST /api/upload-test
+// POST /api/upload-test
+export const uploadTestFile = asyncHandler(async (req, res) => {
+  const file = req.files?.file?.[0]; // Updated for fields usage
+
+  if (!file) {
+    throw new apiError(400, "No file uploaded.");
+  }
+
+  const uploaded = await uploadOnCloudinary(file.path);
+
+  if (!uploaded?.url) {
+    throw new apiError(500, "Cloudinary upload failed.");
+  }
+
+  const savedFile = await FileUpload.create({
+    fileName: file.originalname,
+    cloudinaryUrl: uploaded.url,
+    fileType: file.mimetype,
+  });
+
+  return res.status(201).json(
+    new apiResponse(201, savedFile, "File uploaded and saved successfully.")
+  );
+});
+
+
+// GET /api/upload-test
+export const getUploadedFiles = asyncHandler(async (req, res) => {
+  const files = await FileUpload.find().sort({ createdAt: -1 });
+  return res.status(200).json(
+    new apiResponse(200, files, "Uploaded files retrieved successfully.")
+  );
+});
+
 const registerUserFileUpload = asyncHandler(async (req, res) => {
   const {
     phoneNumber,
@@ -285,6 +322,15 @@ const registerUserFileUpload = asyncHandler(async (req, res) => {
   return res.status(201).json(
     new apiResponse(201, { user, token }, "User registered successfully.")
   );
+});
+
+// Function to handle file upload
+const testUpload = asyncHandler(async (req, res) => {
+  const { file } = req.body;
+  if (!file) {
+    throw new apiError(400, "File is required");
+  }
+
 });
 
 
