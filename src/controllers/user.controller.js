@@ -518,4 +518,112 @@ export const findMatches = asyncHandler(async (req, res) => {
   );
 });
 
+export const updateUser = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+
+  if (!userId) {
+    throw new apiError(401, "User not authenticated.");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new apiError(404, "User not found.");
+  }
+
+  const nestedMergeFields = ["education", "career", "living", "photo", "parentStatus", "familyEnvironment", "matchPreferences"];
+  const fullReplaceFields = [
+    "relationship", "youAre", "name", "dateOfBirth", "gender", "height",
+    "maritalStatus", "religion", "haveChildren", "numberOfChildren",
+    "ethnicity", "city", "area", "country", "openToMoveToDifferentCity", "openToMoveToDifferentCountry",
+    "nationality", "haveDualNationality", "secondNationality", "havePr", "prCountry",
+    "languages", "noOfSisters", "noOfBrothers", "totalSiblings", "siblings"
+  ];
+
+  // Shallow updates
+  fullReplaceFields.forEach(field => {
+    if (req.body[field] !== undefined) {
+      user[field] = req.body[field];
+    }
+  });
+
+  // Deep merge nested fields
+  nestedMergeFields.forEach(field => {
+    if (req.body[field] && typeof req.body[field] === "object") {
+      user[field] = {
+        ...user[field]?.toObject?.() || {}, // existing data
+        ...req.body[field]               // new updates
+      };
+    }
+  });
+
+  const updatedUser = await user.save();
+
+  return res.status(200).json(
+    new apiResponse(200, updatedUser, "User updated successfully.")
+  );
+});
+
+export const likeUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { targetUserId } = req.body;
+
+  if (!targetUserId || targetUserId === userId.toString()) {
+    throw new apiError(400, "Invalid target user.");
+  }
+
+  const targetUser = await User.findById(targetUserId);
+  if (!targetUser) {
+    throw new apiError(404, "Target user not found.");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user.interestedIn.includes(targetUserId)) {
+    user.interestedIn.push(targetUserId);
+    await user.save();
+  }
+
+  return res.status(200).json(
+    new apiResponse(200, user.interestedIn, "User liked successfully.")
+  );
+});
+
+export const unlikeUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { targetUserId } = req.body;
+
+  const user = await User.findById(userId);
+
+  const beforeLength = user.interestedIn.length;
+  user.interestedIn = user.interestedIn.filter(
+    (id) => id.toString() !== targetUserId
+  );
+
+  if (user.interestedIn.length < beforeLength) {
+    await user.save();
+    return res.status(200).json(
+      new apiResponse(200, user.interestedIn, "User unliked successfully.")
+    );
+  } else {
+    return res.status(200).json(
+      new apiResponse(200, user.interestedIn, "User was not in interested list.")
+    );
+  }
+});
+
+export const getUsersWhoLikedMe = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Find all users where interestedIn includes my userId
+  const users = await User.find({ interestedIn: userId })
+    .select("name phoneNumber photo interestedIn") // select any relevant fields
+    .lean();
+
+  return res.status(200).json(
+    new apiResponse(200, users, "Users who liked you.")
+  );
+});
+
+
+
 export {loginRegisterUser, registerUser, getUser, loginUser, verifyOtp, getUserById, registerUserFileUpload};

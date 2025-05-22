@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { findMatches, getUploadedFiles, getUser, getUserById , loginRegisterUser, loginUser, registerUser, registerUserFileUpload, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
+import { findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginUser, registerUser, registerUserFileUpload, unlikeUser, updateUser, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
@@ -56,6 +56,10 @@ router.route("/auth/new-login").post(loginRegisterUser);
 router.route("/auth/verify-otp").post(verifyOtp);
 
 router.route("/find").get(verifyJWT, findMatches);
+router.route("/update").put(verifyJWT, updateUser);
+router.route("/like").patch(verifyJWT, likeUser);
+router.route("/unlike").patch(verifyJWT, unlikeUser);
+router.route("/liked-me").get(verifyJWT, getUsersWhoLikedMe);
 
 router.route("/get").get(getUser);
 router.route("/get/:userId").get(getUserById);

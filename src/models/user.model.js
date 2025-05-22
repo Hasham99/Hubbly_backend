@@ -2,7 +2,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const educationSchema = {
-  highest_degree: String,
+  highestDegree: String,
   institution: String,
   fieldOfStudy: String
 };
@@ -135,7 +135,10 @@ const userSchema = new Schema({
   familyEnvironment: familyEnvironmentSchema,
 
   // SCREEN 14
-  matchPreferences: matchPreferencesSchema
+  matchPreferences: matchPreferencesSchema,
+
+  // User interests
+  interestedIn: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 }, { timestamps: true });
 
 export const User = mongoose.model("User", userSchema)
