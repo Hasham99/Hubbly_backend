@@ -246,6 +246,13 @@ const registerUserFileUpload = asyncHandler(async (req, res) => {
   const uploadedMotherPhoto = motherPhotoFile ? await uploadOnCloudinary(motherPhotoFile.path) : null;
   const uploadedFatherPhoto = fatherPhotoFile ? await uploadOnCloudinary(fatherPhotoFile.path) : null;
 
+  console.log("Uploaded Photos:", {
+    uploadedPhoto,
+    uploadedMotherPhoto,
+    uploadedFatherPhoto
+  }
+  );
+  
   const siblingPhotos = [];
   for (const file of siblingPhotoFiles) {
     const uploaded = await uploadOnCloudinary(file.path);
