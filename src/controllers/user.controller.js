@@ -240,6 +240,14 @@ const registerUserFileUpload = asyncHandler(async (req, res) => {
   const motherPhotoFile = files.mother_photo?.[0];
   const fatherPhotoFile = files.father_photo?.[0];
   const siblingPhotoFiles = files.sibling_photos || [];
+  console.log("Received files:", {
+    photoFile,
+    motherPhotoFile,
+    fatherPhotoFile,
+    siblingPhotoFiles: siblingPhotoFiles.map(file => file.originalname)
+  }
+  );
+
 
   // Upload to Cloudinary
   const uploadedPhoto = photoFile ? await uploadOnCloudinary(photoFile.path) : null;
