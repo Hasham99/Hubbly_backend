@@ -14,7 +14,7 @@ const router = Router();
 // })
 
 // router.route("/auth/register").post(registerUser);
-router.route("/auth/register").post(upload.fields([
+router.route("/auth/register-not-cloudinary").post(upload.fields([
     { name: 'photo', maxCount: 1 },  // User photo
     { name: 'mother_photo', maxCount: 1 },  // Mother photo
     { name: 'father_photo', maxCount: 1 },  // Father photo
@@ -23,7 +23,7 @@ router.route("/auth/register").post(upload.fields([
 registerUser
 );
 
-router.route("/auth/register-cloudinary").post(upload.fields([
+router.route("/auth/register").post(upload.fields([
     { name: 'photo', maxCount: 1 },  // User photo
     { name: 'mother_photo', maxCount: 1 },  // Mother photo
     { name: 'father_photo', maxCount: 1 },  // Father photo
