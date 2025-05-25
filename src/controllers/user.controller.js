@@ -578,6 +578,117 @@ export const updateUser = asyncHandler(async (req, res) => {
   );
 });
 
+export const updateUserWithFiles = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+
+  if (!userId) {
+    throw new apiError(401, "User not authenticated.");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new apiError(404, "User not found.");
+  }
+
+  const files = req.files || {};
+  const body = req.body;
+
+  // Upload and set photo
+  if (files.photo?.[0]) {
+    const uploaded = await uploadOnCloudinary(files.photo[0].path);
+    user.photo = { url: uploaded.url, isPrivate: false };
+  }
+
+  if (files.mother_photo?.[0]) {
+    const uploaded = await uploadOnCloudinary(files.mother_photo[0].path);
+    user.parentStatus = {
+      ...user.parentStatus,
+      mother: {
+        ...user.parentStatus?.mother,
+        photo: uploaded.url
+      }
+    };
+  }
+
+  if (files.father_photo?.[0]) {
+    const uploaded = await uploadOnCloudinary(files.father_photo[0].path);
+    user.parentStatus = {
+      ...user.parentStatus,
+      father: {
+        ...user.parentStatus?.father,
+        photo: uploaded.url
+      }
+    };
+  }
+
+  // Handle siblings with photo uploads
+  const siblingPhotoFiles = files.sibling_photos || [];
+  if (body.siblings || siblingPhotoFiles.length > 0) {
+    let siblings = [];
+
+    try {
+      const parsed = typeof body.siblings === "string"
+        ? JSON.parse(body.siblings)
+        : body.siblings;
+
+      for (let i = 0; i < parsed.length; i++) {
+        const sibling = parsed[i];
+        let photoUrl = user.siblings?.[i]?.photo || null;
+
+        if (siblingPhotoFiles[i]) {
+          const uploaded = await uploadOnCloudinary(siblingPhotoFiles[i].path);
+          photoUrl = uploaded.url;
+        }
+
+        siblings.push({
+          ...sibling,
+          photo: photoUrl
+        });
+      }
+
+      user.siblings = siblings;
+    } catch (e) {
+      throw new apiError(400, "Invalid siblings format.");
+    }
+  }
+
+  // Full replace fields
+  const fullReplaceFields = [
+    "relationship", "youAre", "name", "dateOfBirth", "gender", "height",
+    "maritalStatus", "religion", "haveChildren", "numberOfChildren",
+    "ethnicity", "city", "area", "country", "openToMoveToDifferentCity", "openToMoveToDifferentCountry",
+    "nationality", "haveDualNationality", "secondNationality", "havePr", "prCountry",
+    "languages", "noOfSisters", "noOfBrothers", "totalSiblings"
+  ];
+
+  fullReplaceFields.forEach(field => {
+    if (body[field] !== undefined) {
+      user[field] = body[field];
+    }
+  });
+
+  // Nested merge fields
+  const nestedMergeFields = [
+    "education", "career", "living", "parentStatus", "familyEnvironment", "matchPreferences"
+  ];
+
+  nestedMergeFields.forEach(field => {
+    if (body[field] && typeof body[field] === "object") {
+      const parsed = typeof body[field] === "string" ? JSON.parse(body[field]) : body[field];
+      user[field] = {
+        ...user[field]?.toObject?.() || {},
+        ...parsed
+      };
+    }
+  });
+
+  const updatedUser = await user.save();
+
+  return res.status(200).json(
+    new apiResponse(200, updatedUser, "User updated successfully.")
+  );
+});
+
 export const likeUser = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { targetUserId } = req.body;

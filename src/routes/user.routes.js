@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginUser, registerUser, registerUserFileUpload, unlikeUser, updateUser, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
+import { findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginUser, registerUser, registerUserFileUpload, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
@@ -32,6 +32,8 @@ router.route("/auth/register").post(upload.fields([
 registerUserFileUpload
 );
 
+
+
 router.route("/test-upload").post(upload.fields([
     { name: 'file', maxCount: 1 }  // file upload 
 ]),
@@ -54,9 +56,15 @@ router.route("/test-upload").get(getUploadedFiles);
 router.route("/auth/login").post(loginUser);
 router.route("/auth/new-login").post(loginRegisterUser);
 router.route("/auth/verify-otp").post(verifyOtp);
-
 router.route("/find").get(verifyJWT, findMatches);
 router.route("/update").put(verifyJWT, updateUser);
+router.route("/update-new").put(verifyJWT, 
+    upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'mother_photo', maxCount: 1 },
+    { name: 'father_photo', maxCount: 1 },
+    { name: 'sibling_photos', maxCount: 10 }
+]), updateUserWithFiles);
 router.route("/like").patch(verifyJWT, likeUser);
 router.route("/unlike").patch(verifyJWT, unlikeUser);
 router.route("/liked-me").get(verifyJWT, getUsersWhoLikedMe);
