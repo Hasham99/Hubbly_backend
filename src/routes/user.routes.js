@@ -54,7 +54,9 @@ router.route("/test-upload").get(getUploadedFiles);
 //     registerUser
 // );
 router.route("/auth/login").post(loginUser);
+// old
 router.route("/auth/new-login").post(loginRegisterUser);
+// new
 router.route("/auth/new-login-twilio").post(loginRegisterUserTwilio);
 router.route("/auth/verify-otp").post(verifyOtp);
 router.route("/find").get(verifyJWT, findMatches);
