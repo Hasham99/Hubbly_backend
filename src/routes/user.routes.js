@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginUser, registerUser, registerUserFileUpload, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
+import { findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginRegisterUserTwilio, loginUser, registerUser, registerUserFileUpload, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
@@ -55,6 +55,7 @@ router.route("/test-upload").get(getUploadedFiles);
 // );
 router.route("/auth/login").post(loginUser);
 router.route("/auth/new-login").post(loginRegisterUser);
+router.route("/auth/new-login-twilio").post(loginRegisterUserTwilio);
 router.route("/auth/verify-otp").post(verifyOtp);
 router.route("/find").get(verifyJWT, findMatches);
 router.route("/update").put(verifyJWT, updateUser);

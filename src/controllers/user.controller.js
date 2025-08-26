@@ -20,7 +20,7 @@ const generateToken = (userId) => {
 
 
 // login and register user in one controller
- const loginRegisterUser = asyncHandler(async (req, res) => {
+const loginRegisterUser = asyncHandler(async (req, res) => {
 
   const { phoneNumber } = req.body;
   if (!phoneNumber) {
@@ -51,7 +51,56 @@ const generateToken = (userId) => {
     phoneNumber,
     otp,
   }, "OTP sent to your phone number for registration"));
- });
+});
+
+
+const loginRegisterUserTwilio = asyncHandler(async (req, res) => {
+  const { phoneNumber } = req.body;
+
+  if (!phoneNumber) {
+    throw new apiError(400, "Phone number is required");
+  }
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ phoneNumber });
+
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Save OTP in session
+  req.session.otp = otp;
+  req.session.phoneNumber = phoneNumber;
+
+  // Send OTP via Twilio
+  try {
+    await sendOtpToSms(phoneNumber, otp);
+  } catch (error) {
+    throw new apiError(500, "Failed to send OTP via SMS");
+  }
+
+  if (existingUser) {
+    return res
+      .status(200)
+      .json(
+        new apiResponse(
+          200,
+          { phoneNumber },
+          "OTP sent to your phone number for login"
+        )
+      );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(
+        200,
+        { phoneNumber },
+        "OTP sent to your phone number for registration"
+      )
+    );
+});
+
 
 const registerUser = asyncHandler(async (req, res) => {
   const {
@@ -752,4 +801,4 @@ export const getUsersWhoLikedMe = asyncHandler(async (req, res) => {
 
 
 
-export {loginRegisterUser, registerUser, getUser, loginUser, verifyOtp, getUserById, registerUserFileUpload};
+export {loginRegisterUser,loginRegisterUserTwilio, registerUser, getUser, loginUser, verifyOtp, getUserById, registerUserFileUpload};
