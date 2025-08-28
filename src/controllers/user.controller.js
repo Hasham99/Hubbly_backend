@@ -10,14 +10,12 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { FileUpload } from "../models/fileUpload.model.js"; // ✅ Add this line
 
-
 // Function to generate JWT token
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
   });
 };
-
 
 // login and register user in one controller
 const loginRegisterUser = asyncHandler(async (req, res) => {
