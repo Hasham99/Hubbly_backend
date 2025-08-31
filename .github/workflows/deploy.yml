@@ -32,6 +32,10 @@ jobs:
         echo "TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}" >> .env
         echo "TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}" >> .env
         echo "TWILIO_SMS_NUMBER=${{ secrets.TWILIO_SMS_NUMBER }}" >> .env
+        echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+        echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+        echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+        echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env        echo "TWILIO_SMS_NUMBER=${{ secrets.TWILIO_SMS_NUMBER }}" >> .env
 
     - name: Upload .env to server
       uses: appleboy/scp-action@v0.1.4
