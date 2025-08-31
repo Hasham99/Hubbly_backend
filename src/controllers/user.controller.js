@@ -9,6 +9,7 @@ import { sendOtpToSms } from "../utils/twilioUtils.js"; // Import Twilio utility
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { FileUpload } from "../models/fileUpload.model.js"; // ✅ Add this line
+import { sendOtpEmail } from "../utils/email.js";
 
 // Function to generate JWT token
 const generateToken = (userId) => {
@@ -16,6 +17,124 @@ const generateToken = (userId) => {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
   });
 };
+
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
+
+const sendEmailOtpTESTING = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // If user doesn't exist, create one (optional behavior)
+      user = new User({ email });
+    }
+
+    const otp = generateOtp();
+    user.emailOtp = otp.toString();
+    user.emailOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+    await user.save();
+
+    await sendOtpEmail(email, otp);
+    res.status(200).json({ message: "OTP sent to email" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
+
+
+const verifyEmailOtpTESTING = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ message: "Email and OTP are required" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.emailOtp !== otp) return res.status(400).json({ message: "Invalid OTP" });
+    if (user.emailOtpExpires < Date.now()) return res.status(400).json({ message: "OTP expired" });
+
+    user.emailVerified = true;
+    user.emailOtp = null;
+    user.emailOtpExpires = null;
+    await user.save();
+
+    const token = generateToken(user._id);
+    res.status(200).json({ message: "Email verified successfully", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to verify OTP" });
+  }
+};
+
+
+export const sendEmailOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new apiError(400, "Email is required");
+  }
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ email });
+
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Save OTP in session
+  req.session.otp = otp;
+  req.session.email = email;
+
+  // Send OTP via email
+  try {
+    await sendOtpEmail(email, otp); // Make sure sendOtpEmail() is implemented in utils/email.js
+  } catch (error) {
+    throw new apiError(500, "Failed to send OTP via email");
+  }
+
+  if (existingUser) {
+    return res
+      .status(200)
+      .json(new apiResponse(200, { email }, "OTP sent to your email for login"));
+  }
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, { email }, "OTP sent to your email for registration"));
+});
+
+export const verifyEmailOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!otp || !email) {
+    throw new apiError(400, "Email and OTP are required");
+  }
+
+  // Validate OTP and email from session
+  if (req.session.email !== email || req.session.otp !== otp) {
+    throw new apiError(401, "Invalid OTP or session expired");
+  }
+
+  // OTP verified, find user
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+
+  // Issue JWT token
+  const token = generateToken(user._id);
+
+  // Clear session data
+  req.session.otp = null;
+  req.session.email = null;
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, { token, user }, "Login successful"));
+});
 
 // login and register user in one controller
 const loginRegisterUser = asyncHandler(async (req, res) => {
@@ -98,8 +217,82 @@ const loginRegisterUserTwilio = asyncHandler(async (req, res) => {
     );
 });
 
+export const loginRegisterUserEmail = asyncHandler(async (req, res,  ) => {
+  const { email, password  } = req.body;
+
+  if (!email) {
+    throw new apiError(400, "Email is required");
+  }
+  // ✅ Check if this is the demo user (bypass OTP)
+  if (
+    email === "hashamullah215@gmail.com" &&
+    password === "Hubbly$1234$Demo"
+  ) {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new apiError(404, "Demo user not found");
+    }
+
+    // Issue JWT token
+    const token = generateToken(user._id);
+
+    return res
+      .status(200)
+      .json(new apiResponse(200, { token, user }, "Demo user login successful"));
+  }
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ email });
+
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Save OTP and email in session
+  req.session.otp = otp;
+  req.session.email = email;
+
+  // Send OTP via email
+  try {
+    sendOtpEmail(email, otp); // Your nodemailer function
+  } catch (error) {
+    throw new apiError(500, "Failed to send OTP via email");
+  }
+
+  if (existingUser) {
+    return res.status(200).json(
+      new apiResponse(200, { email }, "OTP sent to your email for login")
+    );
+  }
+
+  return res.status(200).json(
+    new apiResponse(200, { email }, "OTP sent to your email for registration")
+  );
+});
+
+export const deleteUserByEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new apiError(400, "Email is required");
+  }
+
+  // Find user by email
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+
+  // Delete the user
+  await User.deleteOne({ email });
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, `User with email ${email} deleted successfully`));
+});
+
 const registerUser = asyncHandler(async (req, res) => {
   const {
+    email,
     phoneNumber,
     relationship,
     youAre,
@@ -149,6 +342,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Create new user
   const user = await User.create({
+    email,
     phoneNumber,
     relationship,
     youAre,
@@ -231,6 +425,7 @@ export const getUploadedFiles = asyncHandler(async (req, res) => {
 
 const registerUserFileUpload = asyncHandler(async (req, res) => {
   const {
+    email,
     phoneNumber,
     relationship,
     youAre,
@@ -325,6 +520,7 @@ const registerUserFileUpload = asyncHandler(async (req, res) => {
 
   // Build user object
   const user = await User.create({
+    email,
     phoneNumber,
     relationship,
     youAre,

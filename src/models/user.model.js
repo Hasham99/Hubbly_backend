@@ -71,7 +71,14 @@ const matchPreferencesSchema = {
 const userSchema = new Schema({
     
   // supabaseId: { type: String, required: true, unique: true }, // Link to Supabase user
-  phoneNumber: { type: String, required: true, unique: true }, // Phone number for verification
+  phoneNumber: { type: String, unique: true }, // Phone number for verification
+  
+  // NEW FIELDS FOR EMAIL OTP VERIFICATION
+  // , sparse: true
+  email: { type: String, unique: true, required: true }, // email is optional but unique
+  // emailVerified: { type: Boolean, default: false },
+  // emailOtp: String,
+  // emailOtpExpires: Date,
 
   // SCREEN 1
   relationship: String, // Who is the profile for? (Son/Daughter/etc.)

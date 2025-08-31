@@ -2,11 +2,15 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginRegisterUserTwilio, loginUser, registerUser, registerUserFileUpload, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyOtp } from "../controllers/user.controller.js";
+import { deleteUserByEmail, findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginRegisterUserEmail, loginRegisterUserTwilio, loginUser, registerUser, registerUserFileUpload, sendEmailOtp, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyEmailOtp, verifyOtp } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
 const router = Router();
+
+
+router.post("/auth/send-email-otp", sendEmailOtp);
+router.post("/auth/verify-email-otp", verifyEmailOtp);
 
 
 // router.route("/auth0").get((req, res) => {
@@ -32,14 +36,16 @@ router.route("/auth/register").post(upload.fields([
 registerUserFileUpload
 );
 
+router.route("/auth/delete-user").delete(deleteUserByEmail);
+router.route("/auth/login").post(loginRegisterUserEmail);
 
 
-router.route("/test-upload").post(upload.fields([
-    { name: 'file', maxCount: 1 }  // file upload 
-]),
-uploadTestFile
-);
-router.route("/test-upload").get(getUploadedFiles);
+// router.route("/test-upload").post(upload.fields([
+//     { name: 'file', maxCount: 1 }  // file upload 
+// ]),
+// uploadTestFile
+// );
+// router.route("/test-upload").get(getUploadedFiles);
 // router.all('*', (req, res) => {
 //     res.status(404).send('Route not found');
 //   });
@@ -53,12 +59,12 @@ router.route("/test-upload").get(getUploadedFiles);
 //     ]),
 //     registerUser
 // );
-router.route("/auth/login").post(loginUser);
+// router.route("/auth/login").post(loginUser);
 // old
-router.route("/auth/new-login").post(loginRegisterUser);
+// router.route("/auth/new-login").post(loginRegisterUser);
 // new
-router.route("/auth/new-login-twilio").post(loginRegisterUserTwilio);
-router.route("/auth/verify-otp").post(verifyOtp);
+// router.route("/auth/new-login-twilio").post(loginRegisterUserTwilio);
+// router.route("/auth/verify-otp").post(verifyOtp);
 router.route("/find").get(verifyJWT, findMatches);
 router.route("/update").put(verifyJWT, updateUser);
 router.route("/update-new").put(verifyJWT, 
