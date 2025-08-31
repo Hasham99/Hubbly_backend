@@ -51,7 +51,6 @@ const loginRegisterUser = asyncHandler(async (req, res) => {
   }, "OTP sent to your phone number for registration"));
 });
 
-
 const loginRegisterUserTwilio = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
@@ -98,7 +97,6 @@ const loginRegisterUserTwilio = asyncHandler(async (req, res) => {
       )
     );
 });
-
 
 const registerUser = asyncHandler(async (req, res) => {
   const {
@@ -199,7 +197,6 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 // POST /api/upload-test
-// POST /api/upload-test
 export const uploadTestFile = asyncHandler(async (req, res) => {
   const file = req.files?.file?.[0]; // Updated for fields usage
 
@@ -223,7 +220,6 @@ export const uploadTestFile = asyncHandler(async (req, res) => {
     new apiResponse(201, savedFile, "File uploaded and saved successfully.")
   );
 });
-
 
 // GET /api/upload-test
 export const getUploadedFiles = asyncHandler(async (req, res) => {
@@ -394,7 +390,6 @@ const testUpload = asyncHandler(async (req, res) => {
   }
 
 });
-
 
 const loginUser = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
@@ -796,7 +791,5 @@ export const getUsersWhoLikedMe = asyncHandler(async (req, res) => {
     new apiResponse(200, users, "Users who liked you.")
   );
 });
-
-
 
 export {loginRegisterUser,loginRegisterUserTwilio, registerUser, getUser, loginUser, verifyOtp, getUserById, registerUserFileUpload};
