@@ -253,7 +253,7 @@ export const loginRegisterUserEmail = asyncHandler(async (req, res,  ) => {
 
   // Send OTP via email
   try {
-    sendOtpEmail(email, otp); // Your nodemailer function
+    await sendOtpEmail(email, otp); // Your nodemailer function
   } catch (error) {
     throw new apiError(500, "Failed to send OTP via email");
   }
