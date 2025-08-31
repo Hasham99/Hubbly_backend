@@ -92,7 +92,9 @@ export const sendEmailOtp = asyncHandler(async (req, res) => {
   try {
     await sendOtpEmail(email, otp); // Make sure sendOtpEmail() is implemented in utils/email.js
   } catch (error) {
-    throw new apiError(500, "Failed to send OTP via email");
+    console.error("Error sending email:", error.message, error);
+    throw error; // don’t replace it with custom message yet
+    // throw new apiError(500, "Failed to send OTP via email");
   }
 
   if (existingUser) {
