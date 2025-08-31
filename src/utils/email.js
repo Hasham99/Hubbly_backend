@@ -69,5 +69,3 @@ export const sendOtpEmail = async (to, otp) => {
     // throw error; // don’t replace it with custom message yet
   }
 };
-
-
