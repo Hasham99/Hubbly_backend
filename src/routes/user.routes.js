@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { deleteUserByEmail, findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginRegisterUserEmail, loginRegisterUserTwilio, loginUser, registerUser, registerUserFileUpload, sendEmailOtp, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyEmailOtp, verifyOtp } from "../controllers/user.controller.js";
+import {registerUserWithPassword, deleteUserByEmail, findMatches, getUploadedFiles, getUser, getUserById , getUsersWhoLikedMe, likeUser, loginRegisterUser, loginRegisterUserEmail, loginRegisterUserTwilio, loginUser, registerUser, registerUserFileUpload, sendEmailOtp, unlikeUser, updateUser, updateUserWithFiles, uploadTestFile, verifyEmailOtp, verifyOtp, loginUserWithPassword } from "../controllers/user.controller.js";
 
 // const { auth } = require('express-openid-connect');
 
@@ -36,8 +36,23 @@ router.route("/auth/register").post(upload.fields([
 registerUserFileUpload
 );
 
+// ✅ New route (with password)
+router.route("/auth/register-password").post(
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'mother_photo', maxCount: 1 },
+    { name: 'father_photo', maxCount: 1 },
+    { name: 'sibling_photos', maxCount: 10 }
+  ]),
+  registerUserWithPassword
+);
+
 router.route("/auth/delete-user").delete(deleteUserByEmail);
 router.route("/auth/login").post(loginRegisterUserEmail);
+
+router.route("/auth/loginWithPass").post(loginUserWithPassword);
+
+
 
 
 // router.route("/test-upload").post(upload.fields([
